@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Principal;
 
 namespace PW6
 {
@@ -9,16 +8,17 @@ namespace PW6
 
         protected Boss nextBoss;
 
+        public Boss(Boss nextBoss, float requestedAmount) => this.nextBoss = nextBoss;
+
         public void ApproveRequest(float requestedAmount)
         {
             if (requestedAmount < confirmedAmount)
             {
                 Write(requestedAmount);
             }
-            else
+            else if(nextBoss != null)
             {
-                nextBoss = new BossLvl2(confirmedAmount);
-                Write(requestedAmount);
+                nextBoss.Write(requestedAmount);
             }
         }
 
@@ -27,8 +27,10 @@ namespace PW6
 
     public class BossLvl1 : Boss
     {
-
-        public BossLvl1(float requestedAmount) => this.confirmedAmount = 500;
+        public BossLvl1(Boss nextBoss, float requestedAmount) : base(nextBoss, requestedAmount)
+        {
+            confirmedAmount = 500;
+        }
 
         protected override void Write(float requestedAmount)
         {
@@ -38,7 +40,10 @@ namespace PW6
 
     class BossLvl2 : Boss
     {
-        public BossLvl2(float requestedAmount) => this.confirmedAmount = requestedAmount;
+        public BossLvl2(Boss nextBoss, float requestedAmount) : base(nextBoss, requestedAmount)
+        {
+            confirmedAmount = requestedAmount;
+        }
 
         protected override void Write(float requestedAmount)
         {
@@ -53,10 +58,11 @@ namespace PW6
             GiveMeMoney(600);
         }
 
-        private static void GiveMeMoney(float ammount)
+        private static void GiveMeMoney(float amount)
         {
-            Boss boss = new BossLvl1(ammount);
-            boss.ApproveRequest(ammount);
+            BossLvl2 boss2 = new BossLvl2(null, amount);
+            BossLvl1 boss1 = new BossLvl1(boss2, amount);
+            boss1.ApproveRequest(amount);
         }
     }
 }
